@@ -1,0 +1,23 @@
+---
+
+- hosts: all
+
+  vars:
+    composer_user: www-data
+
+  pre_tasks:
+    - block:
+      - name: Install software-properties-common
+        apt: name=software-properties-common state=present update_cache=yes
+
+      - apt_repository:
+          repo: 'ppa:ondrej/php'
+
+      - name: Install php 7.1
+        apt: name={{ item }} state=present update_cache=yes
+        with_items:
+          - "php7.1-cli"
+      when: ansible_distribution == "Ubuntu"
+
+  roles:
+    - role_under_test

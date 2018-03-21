@@ -38,27 +38,13 @@
         with_items:
           - php-cli
 
+      - name: create /etc/ansible_installed_centos_php
+        file:
+          path: /etc/ansible_installed_centos_php
+          state: touch
+        when: yum_config_manager.changed
+
       when: ansible_distribution == "CentOS"
-
-
-    - block:
-      - name: Install software-properties-common
-        apt: name=software-properties-common state=present update_cache=yes
-
-      - name: Install imagemagic
-        apt: name=imagemagick state=present update_cache=yes
-
-      - apt_repository:
-          repo: 'ppa:ondrej/php'
-
-      - name: Install php 7.1
-        apt: name={{ item }} state=present update_cache=yes
-        with_items:
-          - "php7.1-cli"
-
-      when: ansible_distribution == "Ubuntu"
-
-
 
   roles:
     - role_under_test
