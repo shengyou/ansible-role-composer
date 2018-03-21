@@ -1,0 +1,4 @@
+# install_composer default
+
+composer_user: "www-data"
+composer_user_home_path: "/var/www"

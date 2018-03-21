@@ -1,0 +1,46 @@
+---
+
+- block:
+  - name: download composer
+    get_url: url=https://getcomposer.org/installer dest=/tmp/installer
+
+  - name: install composer
+    command: "/usr/bin/php /tmp/installer"
+
+  - name: move composer to /usr/local/bin/
+    command: "mv composer.phar /usr/local/bin/composer"
+
+  - name: create .composer
+    file:
+      path: "{{ composer_user_home_path }}/.composer"
+      state: directory
+      owner: "{{ composer_user }}"
+      group: "{{ composer_user }}"
+      mode: 0700
+    become: yes
+  tags:
+    - install
+
+
+- block:
+  - name: set composer auth.json
+    copy:
+      src: "{{ composer_auth_file_src }}"
+      backup: yes
+      dest: "{{ composer_user_home_path }}/.composer/auth.json"
+      group: "{{ composer_user }}"
+      owner: "{{ composer_user }}"
+      mode: 0644
+    when: composer_auth_file_src is defined
+
+  - name: set composer config.json
+    copy:
+      src: "{{ composer_config_file_src }}"
+      backup: yes
+      dest: "{{ composer_user_home_path }}/.composer/config.json"
+      group: "{{ composer_user }}"
+      owner: "{{ composer_user }}"
+      mode: 0644
+    when: composer_config_file_src is defined
+  tags:
+    - setup

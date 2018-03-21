@@ -1,0 +1,64 @@
+---
+
+- hosts: all
+
+  vars:
+    composer_user: nobody
+
+  pre_tasks:
+
+    - block:
+      - name: install epel-release (CentOS)
+        yum:
+          name: "{{ item }}"
+          state: present
+          update_cache: yes
+        with_items:
+          - epel-release
+          - yum-utils
+
+      - name: install remi-release rpm
+        yum:
+          name: "http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm"
+          state: present
+
+      - name: install epel-release-latest-noarch rpm
+        yum:
+          name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+          state: present
+
+      - name: "yum-config-manager --enable remi-php"
+        command: "yum-config-manager --enable remi-php71"
+        args:
+          creates: /etc/ansible_installed_centos_php
+        register: yum_config_manager
+
+      - name: Install php 7.1
+        yum: name={{ item }} state=present update_cache=yes
+        with_items:
+          - php-cli
+
+      when: ansible_distribution == "CentOS"
+
+
+    - block:
+      - name: Install software-properties-common
+        apt: name=software-properties-common state=present update_cache=yes
+
+      - name: Install imagemagic
+        apt: name=imagemagick state=present update_cache=yes
+
+      - apt_repository:
+          repo: 'ppa:ondrej/php'
+
+      - name: Install php 7.1
+        apt: name={{ item }} state=present update_cache=yes
+        with_items:
+          - "php7.1-cli"
+
+      when: ansible_distribution == "Ubuntu"
+
+
+
+  roles:
+    - role_under_test
